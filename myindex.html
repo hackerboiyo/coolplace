@@ -3,49 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel - Screen Sharing</title>
+<title>Admin Access</title>
 </head>
 <body>
-<h2>Connected Devices</h2>
-<ul id="deviceList"></ul>
 
-<h3>Control Selected Device</h3>
-<button id="controlButton">Gain Control</button>
-<video id="remoteScreen" autoplay></video>
+<!-- Text box for inputting the admin code -->
+<input type="text" id="adminCodeInput" placeholder="Enter admin code" />
+
+<!-- Admin Panel (initially hidden) -->
+<div id="adminPanel" style="display:none; margin-top: 20px;">
+  <h2>Admin Panel</h2>
+  <p>Welcome to the admin panel!</p>
+  <!-- Add more admin controls here -->
+</div>
 
 <script>
-  const socket = new WebSocket('wss://your-websocket-server-url'); // Replace with your WebSocket URL
-  const deviceList = document.getElementById('deviceList');
-  const controlButton = document.getElementById('controlButton');
-  const remoteScreen = document.getElementById('remoteScreen');
-  let selectedDeviceId = '';
+  const adminCodeInput = document.getElementById('adminCodeInput');
+  const adminPanel = document.getElementById('adminPanel');
+  const adminCode = '12pir';
 
-  socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === 'connect') {
-      const deviceItem = document.createElement('li');
-      deviceItem.textContent = `${data.deviceName} (${data.platform})`;
-      deviceItem.onclick = () => {
-        selectedDeviceId = data.deviceId;
-        controlButton.style.display = 'block';  // Show control button for the selected device
-      };
-      deviceList.appendChild(deviceItem);
-
-      // Handle incoming screen stream
-      if (data.type === 'screen-share') {
-        const videoElement = document.createElement('video');
-        videoElement.srcObject = data.stream; // Stream the screen to the video element
-        videoElement.autoplay = true;
-        remoteScreen.appendChild(videoElement);
-      }
+  // Check input when user types in the text box
+  adminCodeInput.addEventListener('input', (event) => {
+    if (adminCodeInput.value === adminCode) {
+      adminPanel.style.display = 'block'; // Show the admin panel
+      adminCodeInput.value = ''; // Clear the input box
     }
-  };
-
-  controlButton.onclick = () => {
-    if (selectedDeviceId) {
-      socket.send(JSON.stringify({ type: 'takeControl', deviceId: selectedDeviceId }));
-    }
-  };
+  });
 </script>
+
 </body>
 </html>
