@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Screen Sharing</title>
+</head>
+<body>
+<h2>Screen Sharing</h2>
+<button id="startButton">Start Sharing Screen</button>
+<video id="remoteVideo" autoplay></video>
+
+<script>
+  const startButton = document.getElementById('startButton');
+  const remoteVideo = document.getElementById('remoteVideo');
+  let localStream;
+  let peerConnection;
+  const signalingServer = 'wss://your-websocket-server-url'; // Replace with your WebSocket URL
+
+  // Start screen sharing
+  startButton.onclick = async () => {
+    try {
+      localStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      peerConnection = new RTCPeerConnection();
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+      // Create an offer to send to the server
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      // Send offer to signaling server
+      const message = { type: 'offer', offer: offer };
+      socket.send(JSON.stringify(message));
+
+      peerConnection.ontrack = (event) => {
+        remoteVideo.srcObject = event.streams[0]; // Show the shared screen on your end
+      };
+    } catch (err) {
+      console.error('Error sharing screen: ', err);
+    }
+  };
+</script>
+</body>
+</html>
